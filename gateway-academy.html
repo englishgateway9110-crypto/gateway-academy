@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peter's English Gateway | 게이트웨이학원</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700;900&family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F7F4EC;
+    --paper-2:#EFEADD;
+    --ink:#1B2A4A;
+    --ink-soft:#33456B;
+    --gold:#C89B3C;
+    --gold-deep:#A87F28;
+    --teal:#3F6B65;
+    --charcoal:#2B2B28;
+    --line: rgba(27,42,74,0.16);
+    --radius: 4px;
+    --serif: 'Noto Serif KR', serif;
+    --sans: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--charcoal);
+    font-family:var(--sans);
+    line-height:1.65;
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+
+  a{color:inherit;}
+  h1,h2,h3{font-family:var(--serif); color:var(--ink); margin:0;}
+
+  /* ---------- Header ---------- */
+  .site-header{
+    position:sticky; top:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 6vw;
+    background:rgba(247,244,236,0.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+  }
+  .brand{
+    display:flex; align-items:baseline; gap:10px;
+    font-family:var(--serif); font-weight:700; font-size:19px; color:var(--ink);
+    text-decoration:none;
+  }
+  .brand small{font-family:var(--sans); font-weight:500; font-size:12px; color:var(--ink-soft);}
+  .nav{display:flex; gap:28px; font-size:14px; font-weight:600;}
+  .nav a{text-decoration:none; color:var(--ink-soft); padding:4px 2px; border-bottom:2px solid transparent;}
+  .nav a:hover, .nav a:focus-visible{color:var(--ink); border-color:var(--gold);}
+  .nav a:focus-visible{outline:2px solid var(--gold); outline-offset:3px;}
+
+  /* ---------- Hero (Gate motif) ---------- */
+  .hero{
+    position:relative;
+    padding:64px 6vw 56px;
+    display:grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap:40px;
+    align-items:center;
+    max-width:1180px;
+    margin:0 auto;
+  }
+  .hero-eyebrow{
+    font-size:13px; letter-spacing:0.14em; font-weight:700; color:var(--gold-deep);
+    text-transform:uppercase; margin-bottom:14px; display:block;
+  }
+  .hero h1{
+    font-size:clamp(30px,4.4vw,46px);
+    line-height:1.25;
+    font-weight:900;
+  }
+  .hero h1 em{color:var(--gold-deep); font-style:normal;}
+  .hero p{
+    margin-top:18px; font-size:16px; color:var(--ink-soft); max-width:46ch;
+  }
+  .hero-actions{margin-top:28px; display:flex; gap:12px; flex-wrap:wrap;}
+  .btn{
+    display:inline-block; padding:13px 24px; border-radius:var(--radius);
+    font-weight:700; font-size:14px; text-decoration:none; cursor:pointer;
+    border:1.5px solid transparent; transition:transform .15s ease, background .15s ease;
+  }
+  .btn:focus-visible{outline:2px solid var(--gold); outline-offset:3px;}
+  .btn-primary{background:var(--ink); color:var(--paper);}
+  .btn-primary:hover{transform:translateY(-2px); background:#142038;}
+  .btn-ghost{background:transparent; color:var(--ink); border-color:var(--ink);}
+  .btn-ghost:hover{transform:translateY(-2px); background:var(--paper-2);}
+
+  .gate-art{display:flex; justify-content:center;}
+  .gate-art svg{width:100%; max-width:340px; height:auto;}
+
+  /* ---------- Section shell ---------- */
+  section.block{max-width:1180px; margin:0 auto; padding:56px 6vw;}
+  .section-head{display:flex; align-items:baseline; gap:14px; margin-bottom:30px;}
+  .section-num{
+    font-family:var(--serif); font-weight:700; font-size:14px; color:var(--gold-deep);
+    border:1px solid var(--gold); border-radius:100px; padding:4px 12px;
+  }
+  .section-head h2{font-size:26px; font-weight:700;}
+  .divider-arch{
+    width:100%; height:14px; margin:0 auto 8px; opacity:0.5;
+  }
+
+  /* ---------- Intro ---------- */
+  .intro-grid{display:grid; grid-template-columns: 1fr 1fr; gap:36px;}
+  .intro-card{
+    background:var(--paper-2); border:1px solid var(--line); border-radius:var(--radius);
+    padding:26px 24px;
+  }
+  .intro-card h3{font-size:16px; margin-bottom:8px;}
+  .intro-card p{font-size:14.5px; color:var(--ink-soft); margin:0;}
+  .intro-text p{font-size:15.5px; color:var(--charcoal);}
+  .intro-text p + p{margin-top:14px;}
+
+  /* ---------- Notices ---------- */
+  .notice-list{list-style:none; margin:0; padding:0; border-top:1px solid var(--line);}
+  .notice-item{
+    display:grid; grid-template-columns: 90px 1fr 100px; gap:16px; align-items:center;
+    padding:16px 4px; border-bottom:1px solid var(--line); font-size:14.5px;
+  }
+  .notice-tag{
+    font-size:11.5px; font-weight:700; color:var(--teal); text-transform:uppercase;
+    letter-spacing:0.06em;
+  }
+  .notice-date{color:var(--ink-soft); font-size:13px; text-align:right;}
+
+  /* ---------- Classroom (video area) ---------- */
+  .classroom-wrap{position:relative;}
+  .gate-overlay{
+    position:absolute; inset:0; z-index:10;
+    display:flex; align-items:center; justify-content:center; flex-direction:column; gap:16px;
+    background:linear-gradient(180deg, rgba(247,244,236,0.85), rgba(247,244,236,0.98));
+    backdrop-filter:blur(3px);
+    border-radius:var(--radius);
+    text-align:center; padding:40px 20px;
+  }
+  .gate-overlay.hidden{display:none;}
+  .gate-overlay h3{font-size:20px; margin-bottom:4px;}
+  .gate-overlay p{color:var(--ink-soft); font-size:14px; margin:0 0 6px;}
+  .pw-form{display:flex; gap:8px; flex-wrap:wrap; justify-content:center;}
+  .pw-form input{
+    padding:12px 14px; border:1.5px solid var(--ink); border-radius:var(--radius);
+    font-size:15px; font-family:var(--sans); min-width:200px; background:#fff;
+  }
+  .pw-form input:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+  .pw-error{color:#B33A3A; font-size:13px; min-height:18px;}
+
+  .video-grid{
+    display:grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap:26px;
+    filter:blur(6px); user-select:none; pointer-events:none; transition:filter .3s ease;
+  }
+  .video-grid.unlocked{filter:none; user-select:auto; pointer-events:auto;}
+
+  .lesson-card{
+    background:#fff; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;
+  }
+  .lesson-plate{
+    display:flex; align-items:center; gap:12px; padding:14px 16px; background:var(--ink); color:var(--paper);
+  }
+  .lesson-num{
+    font-family:var(--serif); font-weight:900; font-size:20px; color:var(--gold);
+    border:1px solid var(--gold); border-radius:100px; width:38px; height:38px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .lesson-title{font-size:14.5px; font-weight:600; line-height:1.4;}
+  .video-frame{position:relative; width:100%; aspect-ratio:16/9; background:#000;}
+  .video-frame iframe{position:absolute; inset:0; width:100%; height:100%; border:0;}
+
+  /* ---------- Footer ---------- */
+  footer{
+    border-top:1px solid var(--line); padding:36px 6vw; text-align:center;
+    color:var(--ink-soft); font-size:13px;
+  }
+  footer strong{color:var(--ink); font-family:var(--serif);}
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 860px){
+    .hero{grid-template-columns:1fr; text-align:center;}
+    .hero p{margin-left:auto; margin-right:auto;}
+    .hero-actions{justify-content:center;}
+    .intro-grid{grid-template-columns:1fr;}
+    .notice-item{grid-template-columns: 70px 1fr; }
+    .notice-date{grid-column:2; text-align:left; margin-top:2px;}
+    .nav{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a class="brand" href="#top">Peter's English Gateway <small>게이트웨이학원</small></a>
+  <nav class="nav">
+    <a href="#intro">학원소개</a>
+    <a href="#notices">공지사항</a>
+    <a href="#classroom">강의실</a>
+  </nav>
+</header>
+
+<section class="hero" id="top">
+  <div>
+    <span class="hero-eyebrow">Pohang · 포항 게이트웨이학원</span>
+    <h1>문을 하나 통과하면,<br><em>영어가 열립니다.</em></h1>
+    <p>중·고등 영어 전문, 게이트웨이학원 온라인 강의실입니다. 수업 시간에 다룬 내용을 차시별로 다시 볼 수 있어요.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#classroom">강의실 입장하기</a>
+      <a class="btn btn-ghost" href="#notices">공지사항 보기</a>
+    </div>
+  </div>
+  <div class="gate-art" aria-hidden="true">
+    <svg viewBox="0 0 340 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M40 280 V150 C40 80 90 30 170 30 C250 30 300 80 300 150 V280" stroke="#1B2A4A" stroke-width="10" fill="none"/>
+      <path d="M70 280 V155 C70 100 110 60 170 60 C230 60 270 100 270 155 V280" stroke="#C89B3C" stroke-width="4" fill="none"/>
+      <rect x="30" y="272" width="280" height="10" fill="#1B2A4A"/>
+      <circle cx="170" cy="150" r="5" fill="#C89B3C"/>
+      <text x="170" y="115" text-anchor="middle" font-family="Noto Serif KR" font-weight="700" font-size="22" fill="#1B2A4A">G</text>
+    </svg>
+  </div>
+</section>
+
+<section class="block" id="intro">
+  <div class="section-head">
+    <span class="section-num">01</span>
+    <h2>학원소개</h2>
+  </div>
+  <div class="intro-grid">
+    <div class="intro-text">
+      <p>게이트웨이학원은 포항 지역 중·고등학생을 대상으로 한 영어·수학 전문 학원입니다. 학교 시험 범위와 출제 경향에 맞춘 맞춤형 수업으로, 개념 이해부터 실전 문제풀이까지 단계적으로 지도합니다.</p>
+      <p>이 강의실 페이지는 수업 시간에 다룬 핵심 내용을 학생들이 언제든 다시 확인할 수 있도록 만든 복습 공간입니다.</p>
+    </div>
+    <div class="intro-card">
+      <h3>운영 안내</h3>
+      <p>
+        상담 및 문의: 000-0000-0000<br>
+        위치: 경상북도 포항시 (상세 주소 입력)<br>
+        평일 00:00 – 00:00
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="notices">
+  <div class="section-head">
+    <span class="section-num">02</span>
+    <h2>공지사항</h2>
+  </div>
+  <ul class="notice-list" id="notice-list"><!-- JS로 채워짐 --></ul>
+</section>
+
+<section class="block classroom-wrap" id="classroom">
+  <div class="section-head">
+    <span class="section-num">03</span>
+    <h2>강의실 · 차시별 영상</h2>
+  </div>
+
+  <div class="gate-overlay" id="gateOverlay">
+    <h3>비밀번호를 입력하세요</h3>
+    <p>수업 시간에 안내받은 공통 비밀번호를 입력하면 영상이 열립니다.</p>
+    <form class="pw-form" id="pwForm">
+      <input type="password" id="pwInput" placeholder="비밀번호" autocomplete="off" aria-label="비밀번호">
+      <button class="btn btn-primary" type="submit">입장</button>
+    </form>
+    <p class="pw-error" id="pwError"></p>
+  </div>
+
+  <div class="video-grid" id="videoGrid"><!-- JS로 채워짐 --></div>
+</section>
+
+<footer>
+  <strong>Peter's English Gateway</strong> · 게이트웨이학원 &nbsp;|&nbsp; 경상북도 포항시 &nbsp;|&nbsp; ⓒ <span id="year"></span>
+</footer>
+
+<script>
+/* =========================================================
+   1) 공통 비밀번호 — 여기만 바꾸면 됩니다.
+   ⚠️ 주의: 이건 페이지 소스코드에 그대로 노출되는 "간단 차단" 방식입니다.
+   완전한 보안이 필요하면(학생별 로그인 등) 별도 시스템이 필요합니다.
+========================================================= */
+const CLASSROOM_PASSWORD = "gateway2026";
+
+/* =========================================================
+   2) 공지사항 — 배열에 추가/수정하면 자동으로 반영됩니다.
+========================================================= */
+const notices = [
+  { tag: "공지", date: "2026.07.20", text: "8월 여름방학 특강 시간표가 안내되었습니다." },
+  { tag: "안내", date: "2026.07.10", text: "중2 2학기 대비 어법 총정리 교재가 배부됩니다." },
+  { tag: "공지", date: "2026.07.01", text: "강의실 비밀번호는 매월 갱신됩니다. 문자 안내를 확인하세요." },
+];
+
+/* =========================================================
+   3) 영상 목록 — 차시별로 추가하세요.
+   videoId: 유튜브 주소 https://youtu.be/영상ID 에서 "영상ID" 부분만 넣으면 됩니다.
+   (유튜브에 "미등록(Unlisted)"으로 업로드한 영상이어야 합니다.)
+========================================================= */
+const lessons = [
+  { num: 1, title: "1강 · 현재시제 오류 찾기 총정리", videoId: "dQw4w9WgXcQ" },
+  { num: 2, title: "2강 · 대명사와 수 일치", videoId: "dQw4w9WgXcQ" },
+  { num: 3, title: "3강 · 문장의 5형식 구분하기", videoId: "dQw4w9WgXcQ" },
+  { num: 4, title: "4강 · 분사구문 기초", videoId: "dQw4w9WgXcQ" },
+];
+
+/* ---------------- 렌더링 (수정할 필요 없음) ---------------- */
+document.getElementById("year").textContent = new Date().getFullYear();
+
+const noticeList = document.getElementById("notice-list");
+noticeList.innerHTML = notices.map(n => `
+  <li class="notice-item">
+    <span class="notice-tag">${n.tag}</span>
+    <span>${n.text}</span>
+    <span class="notice-date">${n.date}</span>
+  </li>
+`).join("");
+
+const videoGrid = document.getElementById("videoGrid");
+videoGrid.innerHTML = lessons.map(l => `
+  <article class="lesson-card">
+    <div class="lesson-plate">
+      <span class="lesson-num">${l.num}</span>
+      <span class="lesson-title">${l.title}</span>
+    </div>
+    <div class="video-frame">
+      <iframe src="https://www.youtube.com/embed/${l.videoId}" title="${l.title}"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen loading="lazy"></iframe>
+    </div>
+  </article>
+`).join("");
+
+/* ---------------- 비밀번호 게이트 ---------------- */
+const gateOverlay = document.getElementById("gateOverlay");
+const pwForm = document.getElementById("pwForm");
+const pwInput = document.getElementById("pwInput");
+const pwError = document.getElementById("pwError");
+
+pwForm.addEventListener("submit", function(e){
+  e.preventDefault();
+  if(pwInput.value.trim() === CLASSROOM_PASSWORD){
+    gateOverlay.classList.add("hidden");
+    videoGrid.classList.add("unlocked");
+  } else {
+    pwError.textContent = "비밀번호가 일치하지 않습니다. 다시 입력해주세요.";
+    pwInput.value = "";
+    pwInput.focus();
+  }
+});
+</script>
+
+</body>
+</html>
