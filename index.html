@@ -194,6 +194,38 @@
   .video-frame{position:relative; width:100%; aspect-ratio:16/9; background:#000;}
   .video-frame iframe{position:absolute; inset:0; width:100%; height:100%; border:0;}
 
+  .hidden{display:none !important;}
+
+  /* ---------- Admin (영상 관리) ---------- */
+  .admin-toggle-wrap{text-align:right; margin-bottom:16px;}
+  .admin-toggle-btn{
+    background:none; border:none; color:var(--ink-soft); font-size:12.5px;
+    text-decoration:underline; cursor:pointer; font-family:var(--sans); padding:4px;
+  }
+  .admin-toggle-btn:hover{color:var(--ink);}
+  .admin-panel{
+    background:var(--paper-2); border:1px dashed var(--gold-deep); border-radius:var(--radius);
+    padding:20px; margin-bottom:30px;
+  }
+  .admin-login-form{display:flex; gap:8px; flex-wrap:wrap;}
+  .admin-login-form input{
+    flex:1; min-width:180px; padding:11px 14px; border:1.5px solid var(--ink); border-radius:var(--radius);
+    font-size:14px; font-family:var(--sans); background:#fff;
+  }
+  .add-lesson-form{display:flex; flex-direction:column; gap:10px;}
+  .add-lesson-form select, .add-lesson-form input{
+    padding:11px 14px; border:1.5px solid var(--line); border-radius:var(--radius);
+    font-size:14px; font-family:var(--sans); background:#fff; width:100%;
+  }
+  .add-lesson-form .btn{align-self:flex-start;}
+  .admin-error{color:#B33A3A; font-size:13px; margin:0; min-height:16px;}
+  .admin-hint{font-size:12.5px; color:var(--ink-soft); margin:0 0 10px;}
+  .lesson-delete{
+    display:block; width:100%; background:none; border:none; border-top:1px solid var(--line);
+    color:#B33A3A; font-size:12.5px; padding:10px; cursor:pointer; font-family:var(--sans);
+  }
+  .lesson-delete:hover{background:#FBEAEA;}
+
   /* ---------- Board (자유게시판) ---------- */
   .post-form{
     background:var(--paper-2); border:1px solid var(--line); border-radius:var(--radius);
@@ -265,7 +297,7 @@
   <div>
     <span class="hero-eyebrow">Pohang · 포항 게이트웨이학원</span>
     <h1>문을 하나 통과하면,<br><em>영어가 열립니다.</em></h1>
-    <p> 게이트웨이학원 온라인 강의실입니다. 수업 시간에 다룬 내용이나 숙제를 위한 강의 자료가 있습니다.</p>
+    <p>중·고등 영어 전문, 게이트웨이학원 온라인 강의실입니다. 수업 시간에 다룬 내용을 차시별로 다시 볼 수 있어요.</p>
     <div class="hero-actions">
       <a class="btn btn-primary" href="#classroom">강의실 입장하기</a>
       <a class="btn btn-ghost" href="#notices">공지사항 보기</a>
@@ -289,7 +321,7 @@
   </div>
   <div class="intro-grid">
     <div class="intro-text">
-      <p>게이트웨이학원은 포항 도구 지역 초·중·고등학생을 대상으로 한 영어·수학 전문 학원입니다. 학교 시험 범위와 출제 경향에 맞춘 맞춤형 수업으로, 개념 이해부터 실전 문제풀이까지 단계적으로 지도합니다.</p>
+      <p>게이트웨이학원은 포항 지역 중·고등학생을 대상으로 한 영어·수학 전문 학원입니다. 학교 시험 범위와 출제 경향에 맞춘 맞춤형 수업으로, 개념 이해부터 실전 문제풀이까지 단계적으로 지도합니다.</p>
       <p>이 강의실 페이지는 수업 시간에 다룬 핵심 내용을 학생들이 언제든 다시 확인할 수 있도록 만든 복습 공간입니다.</p>
     </div>
     <div class="intro-card">
@@ -328,6 +360,29 @@
   </div>
 
   <div id="classroomBody">
+    <div class="admin-toggle-wrap">
+      <button type="button" class="admin-toggle-btn" id="adminToggleBtn">영상 관리 (관리자)</button>
+    </div>
+
+    <div class="admin-panel hidden" id="adminPanel">
+      <form class="admin-login-form" id="adminLoginForm">
+        <input type="password" id="adminPwInput" placeholder="관리자 비밀번호" autocomplete="off" aria-label="관리자 비밀번호">
+        <button class="btn btn-ghost" type="submit">확인</button>
+      </form>
+
+      <form class="add-lesson-form hidden" id="addLessonForm">
+        <p class="admin-hint">영상 추가 후 목록에 바로 반영됩니다. GitHub 편집이 필요 없어요.</p>
+        <div class="post-form-row">
+          <select id="lessonCategorySelect" aria-label="카테고리"></select>
+          <select id="lessonSubcatSelect" aria-label="세부단계"></select>
+        </div>
+        <input type="text" id="lessonTitleInput" placeholder="영상 제목 (예: 3강 · 관계대명사)" maxlength="80">
+        <input type="text" id="lessonUrlInput" placeholder="유튜브 주소 또는 영상ID 붙여넣기">
+        <button class="btn btn-primary" type="submit">영상 추가</button>
+        <p class="admin-error" id="adminError"></p>
+      </form>
+    </div>
+
     <div class="cat-tabs" id="catTabs"><!-- JS로 채워짐 --></div>
     <div id="subcats"><!-- JS로 채워짐 --></div>
   </div>
@@ -369,49 +424,16 @@ const CLASSROOM_PASSWORD = "gateway";
    2) 공지사항 — 배열에 추가/수정하면 자동으로 반영됩니다.
 ========================================================= */
 const notices = [
-  { tag: "공지", date: "2026.07.20", text: "8월 여름방학 특강 시간표를 업로드 할 예정입니다." },
-  { tag: "안내", date: "2026.07.10", text: "중2 2학기 수업 교재가 배부됩니다." },
+  { tag: "공지", date: "2026.07.20", text: "8월 여름방학 특강 시간표가 안내되었습니다." },
+  { tag: "안내", date: "2026.07.10", text: "중2 2학기 대비 어법 총정리 교재가 배부됩니다." },
   { tag: "공지", date: "2026.07.01", text: "강의실 비밀번호는 매월 갱신됩니다. 문자 안내를 확인하세요." },
 ];
 
 /* =========================================================
-   3) 영상 목록 — 대분류(category) > 세부단계(subcategory) > 차시(lessons) 구조입니다.
-   - category: 상단 탭에 표시되는 큰 카테고리 (문법 / 독해 / 원서소설)
-   - subcategories: 그 안의 세부 단계 (예: 기초문법, 중급문법...)
-   - lessons: 각 단계 안의 실제 영상들
-   videoId: 유튜브 주소 https://youtu.be/영상ID 에서 "영상ID" 부분만 넣으면 됩니다.
-   (유튜브에 "미등록(Unlisted)"으로 업로드한 영상이어야 합니다.)
-   ※ 카테고리나 서브카테고리를 더 추가/삭제하고 싶으면 아래 배열에 { } 블록을 추가/삭제하면 됩니다.
+   3) 영상 목록은 이제 관리자 패널(강의실 하단 "영상 관리")에서
+   직접 추가/삭제합니다. 이 파일을 더 이상 고칠 필요가 없습니다 —
+   실제 데이터 및 렌더링 로직은 아래쪽 Firebase 연동 스크립트에 있습니다.
 ========================================================= */
-const curriculum = [
-  {
-    category: "문법",
-    subcategories: [
-      { name: "기초문법", lessons: [
-        { num: 1, title: "리딩90a-1-3", videoId: "o7HDwZv4Nfw" },
-      ]},
-      { name: "중급문법", lessons: [] },
-      { name: "고급문법", lessons: [] },
-      { name: "수능문법", lessons: [] },
-    ]
-  },
-  {
-    category: "독해",
-    subcategories: [
-      { name: "초급", lessons: [] },
-      { name: "중급", lessons: [] },
-      { name: "고급", lessons: [] },
-      { name: "수능", lessons: [] },
-    ]
-  },
-  {
-    category: "원서소설",
-    subcategories: [
-      { name: "Magic Tree House", lessons: [] },
-      { name: "Marvin Redpost", lessons: [] },
-    ]
-  },
-];
 
 /* ---------------- 렌더링 (수정할 필요 없음) ---------------- */
 document.getElementById("year").textContent = new Date().getFullYear();
@@ -424,55 +446,6 @@ noticeList.innerHTML = notices.map(n => `
     <span class="notice-date">${n.date}</span>
   </li>
 `).join("");
-
-const catTabs = document.getElementById("catTabs");
-const subcatsWrap = document.getElementById("subcats");
-let activeCategoryIndex = 0;
-
-function lessonCard(l){
-  return `
-    <article class="lesson-card">
-      <div class="lesson-plate">
-        <span class="lesson-num">${l.num}</span>
-        <span class="lesson-title">${l.title}</span>
-      </div>
-      <div class="video-frame">
-        <iframe src="https://www.youtube.com/embed/${l.videoId}" title="${l.title}"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen loading="lazy"></iframe>
-      </div>
-    </article>`;
-}
-
-function renderTabs(){
-  catTabs.innerHTML = curriculum.map((c, i) => `
-    <button type="button" class="cat-tab ${i === activeCategoryIndex ? "active" : ""}" data-index="${i}">${c.category}</button>
-  `).join("");
-  catTabs.querySelectorAll(".cat-tab").forEach(btn => {
-    btn.addEventListener("click", () => {
-      activeCategoryIndex = parseInt(btn.dataset.index, 10);
-      renderTabs();
-      renderSubcats();
-    });
-  });
-}
-
-function renderSubcats(){
-  const cat = curriculum[activeCategoryIndex];
-  subcatsWrap.innerHTML = cat.subcategories.map(sub => `
-    <div class="subcat-block">
-      <h3 class="subcat-title">${sub.name}</h3>
-      <div class="video-grid">
-        ${ sub.lessons.length
-            ? sub.lessons.map(lessonCard).join("")
-            : `<p class="empty-note">아직 등록된 영상이 없습니다.</p>` }
-      </div>
-    </div>
-  `).join("");
-}
-
-renderTabs();
-renderSubcats();
 
 /* ---------------- 비밀번호 게이트 ---------------- */
 const gateOverlay = document.getElementById("gateOverlay");
@@ -500,7 +473,7 @@ pwForm.addEventListener("submit", function(e){
    ⚠️ 여기서 바꿀 부분은 딱 하나, 아래 ADMIN_PASSWORD입니다.
    (원장님이 어떤 글이든 삭제할 수 있는 관리자 전용 비밀번호)
 ========================================================= */
-const ADMIN_PASSWORD = "peter 9110";
+const ADMIN_PASSWORD = "gateway_admin_2026";
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
@@ -521,6 +494,175 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+/* =========================================================
+   강의실 · 차시별 영상 (Firestore "lessons" 컬렉션 연동)
+   카테고리/세부단계 구조를 바꾸고 싶으면 아래 CATEGORY_STRUCTURE만 수정하면 됩니다.
+========================================================= */
+const CATEGORY_STRUCTURE = [
+  { category: "문법", subcategories: ["기초문법", "중급문법", "고급문법", "수능문법"] },
+  { category: "독해", subcategories: ["초급", "중급", "고급", "수능"] },
+  { category: "원서소설", subcategories: ["Magic Tree House", "Marvin Redpost"] },
+];
+
+const catTabs = document.getElementById("catTabs");
+const subcatsWrap = document.getElementById("subcats");
+let activeCategoryIndex = 0;
+let allLessons = [];
+let isAdmin = false;
+
+function extractVideoId(input){
+  input = input.trim();
+  const patterns = [/youtu\.be\/([\w-]{6,})/, /[?&]v=([\w-]{6,})/, /embed\/([\w-]{6,})/];
+  for(const p of patterns){
+    const m = input.match(p);
+    if(m) return m[1];
+  }
+  return input;
+}
+
+function lessonCard(l, index){
+  return `
+    <article class="lesson-card">
+      <div class="lesson-plate">
+        <span class="lesson-num">${index + 1}</span>
+        <span class="lesson-title">${escapeHtml(l.title)}</span>
+      </div>
+      <div class="video-frame">
+        <iframe src="https://www.youtube.com/embed/${l.videoId}" title="${escapeHtml(l.title)}"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen loading="lazy"></iframe>
+      </div>
+      ${ isAdmin ? `<button type="button" class="lesson-delete" data-id="${l.id}">이 영상 삭제</button>` : "" }
+    </article>`;
+}
+
+function renderTabs(){
+  catTabs.innerHTML = CATEGORY_STRUCTURE.map((c, i) => `
+    <button type="button" class="cat-tab ${i === activeCategoryIndex ? "active" : ""}" data-index="${i}">${c.category}</button>
+  `).join("");
+  catTabs.querySelectorAll(".cat-tab").forEach(btn => {
+    btn.addEventListener("click", () => {
+      activeCategoryIndex = parseInt(btn.dataset.index, 10);
+      renderTabs();
+      renderSubcats();
+    });
+  });
+}
+
+function renderSubcats(){
+  const cat = CATEGORY_STRUCTURE[activeCategoryIndex];
+  subcatsWrap.innerHTML = cat.subcategories.map(subName => {
+    const lessons = allLessons.filter(l => l.category === cat.category && l.subcategory === subName);
+    return `
+      <div class="subcat-block">
+        <h3 class="subcat-title">${subName}</h3>
+        <div class="video-grid">
+          ${ lessons.length
+              ? lessons.map((l, i) => lessonCard(l, i)).join("")
+              : `<p class="empty-note">아직 등록된 영상이 없습니다.</p>` }
+        </div>
+      </div>`;
+  }).join("");
+
+  if(isAdmin){
+    subcatsWrap.querySelectorAll(".lesson-delete").forEach(btn => {
+      btn.addEventListener("click", () => handleLessonDelete(btn.dataset.id));
+    });
+  }
+}
+
+async function loadLessons(){
+  try {
+    const q = query(collection(db, "lessons"), orderBy("createdAt", "asc"));
+    const snap = await getDocs(q);
+    allLessons = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch(err){
+    allLessons = [];
+    console.error(err);
+  }
+  renderTabs();
+  renderSubcats();
+}
+
+async function handleLessonDelete(id){
+  if(!confirm("이 영상을 삭제하시겠습니까?")) return;
+  try {
+    await deleteDoc(doc(db, "lessons", id));
+    await loadLessons();
+  } catch(err){
+    alert("삭제 중 오류가 발생했습니다.");
+    console.error(err);
+  }
+}
+
+loadLessons();
+
+/* ---------------- 관리자 패널 ---------------- */
+const adminToggleBtn = document.getElementById("adminToggleBtn");
+const adminPanel = document.getElementById("adminPanel");
+const adminLoginForm = document.getElementById("adminLoginForm");
+const adminPwInput = document.getElementById("adminPwInput");
+const addLessonForm = document.getElementById("addLessonForm");
+const adminError = document.getElementById("adminError");
+const lessonCategorySelect = document.getElementById("lessonCategorySelect");
+const lessonSubcatSelect = document.getElementById("lessonSubcatSelect");
+
+lessonCategorySelect.innerHTML = CATEGORY_STRUCTURE.map(c => `<option value="${c.category}">${c.category}</option>`).join("");
+
+function refreshSubcatOptions(){
+  const cat = CATEGORY_STRUCTURE.find(c => c.category === lessonCategorySelect.value) || CATEGORY_STRUCTURE[0];
+  lessonSubcatSelect.innerHTML = cat.subcategories.map(s => `<option value="${s}">${s}</option>`).join("");
+}
+refreshSubcatOptions();
+lessonCategorySelect.addEventListener("change", refreshSubcatOptions);
+
+adminToggleBtn.addEventListener("click", () => {
+  adminPanel.classList.toggle("hidden");
+});
+
+adminLoginForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  if(adminPwInput.value === ADMIN_PASSWORD){
+    isAdmin = true;
+    adminLoginForm.classList.add("hidden");
+    addLessonForm.classList.remove("hidden");
+    renderSubcats();
+  } else {
+    alert("관리자 비밀번호가 일치하지 않습니다.");
+  }
+  adminPwInput.value = "";
+});
+
+addLessonForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  adminError.textContent = "";
+  const category = lessonCategorySelect.value;
+  const subcategory = lessonSubcatSelect.value;
+  const title = document.getElementById("lessonTitleInput").value.trim();
+  const rawUrl = document.getElementById("lessonUrlInput").value.trim();
+
+  if(!title || !rawUrl){
+    adminError.textContent = "제목과 유튜브 주소(또는 영상ID)를 입력해주세요.";
+    return;
+  }
+  const videoId = extractVideoId(rawUrl);
+
+  const submitBtn = addLessonForm.querySelector("button[type=submit]");
+  submitBtn.disabled = true;
+  try {
+    await addDoc(collection(db, "lessons"), { category, subcategory, title, videoId, createdAt: serverTimestamp() });
+    addLessonForm.reset();
+    refreshSubcatOptions();
+    await loadLessons();
+  } catch(err){
+    adminError.textContent = "영상 추가에 실패했습니다. 잠시 후 다시 시도해주세요.";
+    console.error(err);
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+/* ---------------- 자유게시판 ---------------- */
 const postForm = document.getElementById("postForm");
 const postList = document.getElementById("postList");
 const postError = document.getElementById("postError");
