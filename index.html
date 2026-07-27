@@ -124,14 +124,14 @@
   /* ---------- Notices ---------- */
   .notice-list{list-style:none; margin:0; padding:0; border-top:1px solid var(--line);}
   .notice-item{
-    display:grid; grid-template-columns: 90px 1fr 100px; gap:16px; align-items:center;
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
     padding:16px 4px; border-bottom:1px solid var(--line); font-size:14.5px;
   }
   .notice-tag{
     font-size:11.5px; font-weight:700; color:var(--teal); text-transform:uppercase;
     letter-spacing:0.06em;
   }
-  .notice-date{color:var(--ink-soft); font-size:13px; text-align:right;}
+  .notice-date{color:var(--ink-soft); font-size:13px; margin-left:auto;}
 
   /* ---------- Classroom (video area) ---------- */
   .classroom-wrap{position:relative;}
@@ -275,8 +275,6 @@
     .hero p{margin-left:auto; margin-right:auto;}
     .hero-actions{justify-content:center;}
     .intro-grid{grid-template-columns:1fr;}
-    .notice-item{grid-template-columns: 70px 1fr; }
-    .notice-date{grid-column:2; text-align:left; margin-top:2px;}
     .nav{display:none;}
   }
 </style>
@@ -340,6 +338,29 @@
     <span class="section-num">02</span>
     <h2>공지사항</h2>
   </div>
+
+  <div class="admin-toggle-wrap">
+    <button type="button" class="admin-toggle-btn" id="noticeAdminToggleBtn">공지 관리 (관리자)</button>
+  </div>
+
+  <div class="admin-panel hidden" id="noticeAdminPanel">
+    <form class="admin-login-form" id="noticeAdminLoginForm">
+      <input type="password" id="noticeAdminPwInput" placeholder="관리자 비밀번호" autocomplete="off" aria-label="관리자 비밀번호">
+      <button class="btn btn-ghost" type="submit">확인</button>
+    </form>
+
+    <form class="add-lesson-form hidden" id="addNoticeForm">
+      <p class="admin-hint">공지 추가 후 목록에 바로 반영됩니다. GitHub 편집이 필요 없어요.</p>
+      <select id="noticeTagSelect" aria-label="태그">
+        <option value="공지">공지</option>
+        <option value="안내">안내</option>
+      </select>
+      <input type="text" id="noticeTextInput" placeholder="공지 내용을 입력하세요" maxlength="200">
+      <button class="btn btn-primary" type="submit">공지 추가</button>
+      <p class="admin-error" id="noticeAdminError"></p>
+    </form>
+  </div>
+
   <ul class="notice-list" id="notice-list"><!-- JS로 채워짐 --></ul>
 </section>
 
@@ -421,13 +442,10 @@
 const CLASSROOM_PASSWORD = "gateway";
 
 /* =========================================================
-   2) 공지사항 — 배열에 추가/수정하면 자동으로 반영됩니다.
+   2) 공지사항은 이제 관리자 패널(공지사항 하단 "공지 관리")에서
+   직접 추가/삭제합니다. 이 파일을 더 이상 고칠 필요가 없습니다 —
+   실제 데이터 및 렌더링 로직은 아래쪽 Firebase 연동 스크립트에 있습니다.
 ========================================================= */
-const notices = [
-  { tag: "공지", date: "2026.07.20", text: "8월 여름방학 특강 시간표가 안내되었습니다." },
-  { tag: "안내", date: "2026.07.10", text: "중2 2학기 대비 어법 총정리 교재가 배부됩니다." },
-  { tag: "공지", date: "2026.07.01", text: "강의실 비밀번호는 매월 갱신됩니다. 문자 안내를 확인하세요." },
-];
 
 /* =========================================================
    3) 영상 목록은 이제 관리자 패널(강의실 하단 "영상 관리")에서
@@ -437,15 +455,6 @@ const notices = [
 
 /* ---------------- 렌더링 (수정할 필요 없음) ---------------- */
 document.getElementById("year").textContent = new Date().getFullYear();
-
-const noticeList = document.getElementById("notice-list");
-noticeList.innerHTML = notices.map(n => `
-  <li class="notice-item">
-    <span class="notice-tag">${n.tag}</span>
-    <span>${n.text}</span>
-    <span class="notice-date">${n.date}</span>
-  </li>
-`).join("");
 
 /* ---------------- 비밀번호 게이트 ---------------- */
 const gateOverlay = document.getElementById("gateOverlay");
@@ -620,17 +629,122 @@ adminToggleBtn.addEventListener("click", () => {
   adminPanel.classList.toggle("hidden");
 });
 
+/* ---------------- 공지사항 ---------------- */
+const noticeList = document.getElementById("notice-list");
+let allNotices = [];
+
+function noticeItem(n){
+  return `
+    <li class="notice-item">
+      <span class="notice-tag">${escapeHtml(n.tag)}</span>
+      <span>${escapeHtml(n.text)}</span>
+      <span class="notice-date">${formatDate(n.createdAt)}</span>
+      ${ isAdmin ? `<button type="button" class="post-delete" data-id="${n.id}">삭제</button>` : "" }
+    </li>`;
+}
+
+function renderNotices(){
+  if(!allNotices.length){
+    noticeList.innerHTML = `<li class="post-empty">등록된 공지사항이 없습니다.</li>`;
+    return;
+  }
+  noticeList.innerHTML = allNotices.map(noticeItem).join("");
+  if(isAdmin){
+    noticeList.querySelectorAll(".post-delete").forEach(btn => {
+      btn.addEventListener("click", () => handleNoticeDelete(btn.dataset.id));
+    });
+  }
+}
+
+async function loadNotices(){
+  try {
+    const q = query(collection(db, "notices"), orderBy("createdAt", "desc"));
+    const snap = await getDocs(q);
+    allNotices = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch(err){
+    allNotices = [];
+    console.error(err);
+  }
+  renderNotices();
+}
+
+async function handleNoticeDelete(id){
+  if(!confirm("이 공지를 삭제하시겠습니까?")) return;
+  try {
+    await deleteDoc(doc(db, "notices", id));
+    await loadNotices();
+  } catch(err){
+    alert("삭제 중 오류가 발생했습니다.");
+    console.error(err);
+  }
+}
+
+loadNotices();
+
+/* ---------------- 공지 관리자 패널 ---------------- */
+const noticeAdminToggleBtn = document.getElementById("noticeAdminToggleBtn");
+const noticeAdminPanel = document.getElementById("noticeAdminPanel");
+const noticeAdminLoginForm = document.getElementById("noticeAdminLoginForm");
+const noticeAdminPwInput = document.getElementById("noticeAdminPwInput");
+const addNoticeForm = document.getElementById("addNoticeForm");
+const noticeAdminError = document.getElementById("noticeAdminError");
+
+noticeAdminToggleBtn.addEventListener("click", () => {
+  noticeAdminPanel.classList.toggle("hidden");
+});
+
+addNoticeForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  noticeAdminError.textContent = "";
+  const tag = document.getElementById("noticeTagSelect").value;
+  const text = document.getElementById("noticeTextInput").value.trim();
+  if(!text){
+    noticeAdminError.textContent = "공지 내용을 입력해주세요.";
+    return;
+  }
+  const submitBtn = addNoticeForm.querySelector("button[type=submit]");
+  submitBtn.disabled = true;
+  try {
+    await addDoc(collection(db, "notices"), { tag, text, createdAt: serverTimestamp() });
+    addNoticeForm.reset();
+    await loadNotices();
+  } catch(err){
+    noticeAdminError.textContent = "공지 등록에 실패했습니다. 잠시 후 다시 시도해주세요.";
+    console.error(err);
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+/* ---------------- 관리자 로그인 (영상 관리 + 공지 관리 공통) ---------------- */
+function unlockAdminUI(){
+  isAdmin = true;
+  adminLoginForm.classList.add("hidden");
+  addLessonForm.classList.remove("hidden");
+  noticeAdminLoginForm.classList.add("hidden");
+  addNoticeForm.classList.remove("hidden");
+  renderSubcats();
+  renderNotices();
+}
+
 adminLoginForm.addEventListener("submit", (e) => {
   e.preventDefault();
   if(adminPwInput.value === ADMIN_PASSWORD){
-    isAdmin = true;
-    adminLoginForm.classList.add("hidden");
-    addLessonForm.classList.remove("hidden");
-    renderSubcats();
+    unlockAdminUI();
   } else {
     alert("관리자 비밀번호가 일치하지 않습니다.");
   }
   adminPwInput.value = "";
+});
+
+noticeAdminLoginForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  if(noticeAdminPwInput.value === ADMIN_PASSWORD){
+    unlockAdminUI();
+  } else {
+    alert("관리자 비밀번호가 일치하지 않습니다.");
+  }
+  noticeAdminPwInput.value = "";
 });
 
 addLessonForm.addEventListener("submit", async (e) => {
