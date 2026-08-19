@@ -134,14 +134,13 @@
   .notice-date{color:var(--ink-soft); font-size:13px; margin-left:auto;}
 
   /* ---------- Classroom (video area) ---------- */
-  .classroom-wrap{position:relative;}
   .gate-overlay{
-    position:absolute; inset:0; z-index:10;
     display:flex; align-items:center; justify-content:center; flex-direction:column; gap:16px;
-    background:linear-gradient(180deg, rgba(247,244,236,0.85), rgba(247,244,236,0.98));
-    backdrop-filter:blur(3px);
+    background:var(--paper-2);
+    border:1px solid var(--line);
     border-radius:var(--radius);
-    text-align:center; padding:40px 20px;
+    text-align:center; padding:36px 20px;
+    margin-bottom:34px;
   }
   .gate-overlay.hidden{display:none;}
   .gate-overlay h3{font-size:20px; margin-bottom:4px;}
